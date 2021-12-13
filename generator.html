@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MoonCat Generator</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="base.css">
+  <style>
+    body{
+      background-color: white;
+    }
+    canvas{
+      width: 128px;
+      height: 128px;
+    }
+    .container{
+      overflow: scroll;
+    }
+  </style>
+</head>
+<body>
+  <div class="inputs">
+    Enter a Number to generate new un-minted MoonCats
+    <br>
+    The MoonCats generated have not been minted so there is no owner on the Blockchain.
+    <br><input type="text" value="2" id="count"> Genesis: <input type="checkbox" id="genesis">
+    <br>
+    <textarea rows="4" cols="40" id="log"></textarea>
+  </div>
+  <div class="container">
+
+    
+    <div id="output">
+      
+    </div>
+  </div>
+  <script src="./src/generator.js" type="module"></script>
+</body>
+</html>

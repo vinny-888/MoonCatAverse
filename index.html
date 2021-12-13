@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MoonCatAverse</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="base.css">
+  <script src="./src/ethereum/web3.min.js"></script>
+  <script src='./src/ethereum/wallet.js'></script>
+</head>
+<body>
+  <div>Chrome Desktop Support Only Currently. First load can take 30-60seconds to cache all the data.</div>
+  <div class="status_div">
+    <span id="status">Connect Wallet to see your MoonCat's parcels... Skip to browse the world.</span>
+    <br><input type="button" id="skip" value="Skip" onclick="skip()">
+  </div>
+  <div class="ui" id="game-ui">
+    <div class="container" id="container">
+      <div class="icon-bar-layout">
+        <div class="icon-bar" id="icon-bar">
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./src/main.js?v=0.3" type="module">
+  </script>
+  <script type="text/javascript">
+    // loadWallet();
+  </script>
+</body>
+</html>
