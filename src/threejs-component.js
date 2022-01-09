@@ -13,6 +13,8 @@ import {FXAAShader} from 'https://cdn.jsdelivr.net/npm/three@0.125/examples/jsm/
 import {entity} from "./entity.js";
 import {hack_defs} from "./hack-defs.js";
 import {defs} from "./defs.js";
+import { mooncats } from './mooncats/mooncat_ids.js';
+import { MoonCatParser } from './mooncats/mooncatParser.js';
 
 import {OrbitControls} from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/controls/OrbitControls.js';
 
@@ -78,6 +80,13 @@ export const threejs_component = (() => {
     // gl_FragColor = vec4(vec3(normalMix * normalMix), 1.0);
   }`;
 
+  let cubes = [];
+  let mooncatsArr = [];
+  let mooncatsDirections = [];
+  let bounce_height = 7.5;
+  let bounceSpeed = 2;
+  let rotateSpeed = 0.1;
+
   class ThreeJSController extends entity.Component {
     constructor() {
       super();
@@ -110,8 +119,19 @@ export const threejs_component = (() => {
   
       this.uiCamera_ = new THREE.PerspectiveCamera(fov, aspect, near, far);
 
+      // let mooncat = this.renderMoonCat(1);
+      // this.camera_.add(mooncat);
+      // mooncat.position.set(0,0,-1);
+
       this.scene_ = new THREE.Scene();
       this.scene_.add(this.camera_);
+      let start = Math.round(Math.random()*9999);
+      for(let i=start; i<start+50; i++){
+        let mooncat = this.renderMoonCat(i);
+        mooncat.position.set(Math.random()*200,6.5+Math.random()/10,Math.random()*200);
+        this.scene_.add(mooncat);
+        mooncatsArr.push(mooncat);
+      }
 
       this.uiScene_ = new THREE.Scene();
       this.uiScene_.add(this.uiCamera_);
@@ -182,6 +202,83 @@ export const threejs_component = (() => {
 
       this.LoadSky_();
       this.OnResize_();
+    }
+
+    renderMoonCat(mooncatId){
+      let blockSize = 0.1;
+      let group = new THREE.Group();
+      // group = new THREE.Group();
+      const position = new THREE.Vector3();
+      position.x = 0;
+      position.y = 0;
+      position.z = 0;
+
+      const rotation = new THREE.Euler();
+      rotation.x = 0;
+      rotation.y = 0;
+      rotation.z = 0;
+
+      const scale = new THREE.Vector3();
+      scale.x = 1;
+      scale.y = 1;
+      scale.z = 1;
+      // group.position.set( position );
+      const matrix = new THREE.Matrix4();
+      const quaternion = new THREE.Quaternion();
+      const color = new THREE.Color();
+
+      let pixelMap = MoonCatParser.generateMoonCatPixelMap(mooncats[mooncatId]);
+
+      const offset = new THREE.Vector3( -blockSize*pixelMap.length/2, 0, -blockSize*pixelMap[0].length/2 );
+
+      pixelMap.forEach((row, i)=>{
+        row.forEach((pixel, j)=>{
+          if(pixel != null){
+            const material = new THREE.MeshBasicMaterial( {color: pixel} );
+            if(true || (i == 0 || i == pixelMap.length-1) || (j == 0 || j == row.length-1)){
+              let geometry = new THREE.BoxGeometry(1, 1, 1);
+
+              const cube = new THREE.Mesh( geometry, material );
+  
+              let x = i*blockSize + offset.x;
+              let y = -j*blockSize - offset.z;
+              let z = 0 + offset.y;
+  
+              cube.position.set( x,y,z );
+              cube.rotation.set( 0,0,0 );
+              cube.scale.set( blockSize,blockSize,blockSize );
+              cubes.push(cube);
+              group.add(cube);
+            } else {
+              let geometryFront = new THREE.PlaneGeometry(1, 1, 1);
+              let geometryBack = new THREE.PlaneGeometry(1, 1, 1);
+
+              const planeFront = new THREE.Mesh( geometryFront, material );
+              const planeBack = new THREE.Mesh( geometryBack, material );
+  
+              let x = i*blockSize + offset.x;
+              let y = -j*blockSize - offset.z;
+              let z = 0 + offset.y;
+  
+              planeFront.position.set( x,y,z-blockSize );
+              planeFront.rotation.set( 0,Math.PI,0 );
+              planeFront.scale.set( blockSize,1,blockSize );
+              cubes.push(planeFront);
+              group.add(planeFront);
+
+              planeBack.position.set( x,y,z-blockSize );
+              planeBack.rotation.set( 0,0,0 );
+              planeBack.scale.set( blockSize,1,blockSize );
+              cubes.push(planeBack);
+              group.add(planeBack);
+            }
+            // scene.add( cube );
+          }
+        })
+      })
+
+      group.rotation.set( 0, 0, 0 );
+      return group;
     }
 
     OnResize_() {
@@ -268,6 +365,23 @@ export const threejs_component = (() => {
       this.uiCamera_.quaternion.copy(this.camera_.quaternion);
 
       this.composer_.render();
+
+      mooncatsArr.forEach((mooncat, index)=>{
+        if(!mooncatsDirections[index]){
+          mooncatsDirections[index] = Math.random()/20-0.05*bounceSpeed;
+        }
+        mooncat.position.x += (Math.random()/20)-0.025;
+        mooncat.position.z += (Math.random()/20)-0.025;
+        if(mooncat.position.y >= bounce_height){
+          mooncatsDirections[index] = -mooncatsDirections[index];
+        } else if (mooncat.position.y <= bounce_height-1){
+          mooncatsDirections[index] = mooncatsDirections[index]*-1;
+        }
+
+        mooncat.position.y += mooncatsDirections[index];
+
+        mooncat.rotation.y += Math.PI/60 * Math.random() * rotateSpeed;
+      });
       // this.threejs_.render(this.scene_, this.camera_);
     }
   }

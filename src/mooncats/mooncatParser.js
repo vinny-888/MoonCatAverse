@@ -1,4 +1,4 @@
-export const MoonCatParser = (function () {
+export const MoonCatParser = (() => {
   var designs = [
     "00011111100000000.01113333310000000.13533333331110000.01333134331331000.00133333431333111.00133335331333351.00133333431331111.01333134331333111.13533333331313351.01113333313341111.00011111133344411.00000133333341151.00000133333313331.00000133333333311.00000133333333110.00000113333331100.00000011133311000.00011100131110000.00013111131000000.00011333311000000.00000111110000000",
     "00000000111100.00011111113110.01113333313310.13533333331310.01333134331510.00133333431110.00133335331510.00133333431310.01333134331310.13533333331111.01113333311331.00011111131131.00011333334131.00013333334131.00013333133131.00011333311331.00001333313311.00001333333110.00001113331100.00000011111000",
@@ -317,6 +317,37 @@ export const MoonCatParser = (function () {
           }
         }
         return canvas.toDataURL();
+      },
+      generateMoonCatPixelMap: function(catId){
+          return mooncatparser(catId);
+      },
+      generateMoonCatCanvas: function(catId, size){
+        size = size || 1;
+        var data = mooncatparser(catId);
+        var canvas = document.createElement("canvas");
+        let imageSize = 128;
+        canvas.width = imageSize;//size * data.length;
+        canvas.height = imageSize;//size * data[1].length;
+        var ctx = canvas.getContext("2d");
+      
+        let lengthDelta = Math.floor((imageSize - data.length)/2);
+        for(var i = 0; i < Math.max(data.length, imageSize); i++){
+          let iOffset = i - lengthDelta; 
+          if(iOffset >= 0 && iOffset < data.length){
+            let heightDelta = Math.floor((imageSize - data[iOffset].length)/2);
+            for(var j = 0; j < Math.max(data[iOffset].length, imageSize); j++){
+              let jOffset = j - heightDelta; 
+              if(jOffset >= 0 && jOffset < data[iOffset].length){
+                var color = data[iOffset][jOffset];
+                if(color){
+                  ctx.fillStyle = color;
+                  ctx.fillRect(iOffset * size, jOffset * size, size, size);
+                }
+              }
+            }
+          }
+        }
+        return canvas;
       }
   };
 })();

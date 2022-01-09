@@ -1,6 +1,6 @@
 import * as THREE from './libs/three.module.js';
 
-import {threejs_component} from './threejs-component.js';
+import {threejs_component} from './threejs-component.js?v=0.1';
 import {sparse_voxel_cell_manager} from './sparse-voxel-cell-manager.js';
 
 import {entity_manager} from './entity-manager.js';
