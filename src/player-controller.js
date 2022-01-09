@@ -261,16 +261,16 @@ export const player_controller = (() => {
 
 
       if (this.keys_.forward) {
-        this.velocity_.z -= this.acceleration_.z * timeInSeconds * (this.keys_.shift ? 4 : 1);
+        this.velocity_.z -= this.acceleration_.z * timeInSeconds * (this.keys_.shift ? 8 : 1);
       }
       if (this.keys_.backward) {
-        this.velocity_.z += this.acceleration_.z * timeInSeconds * (this.keys_.shift ? 4 : 1);
+        this.velocity_.z += this.acceleration_.z * timeInSeconds * (this.keys_.shift ? 8 : 1);
       }
       if (this.keys_.left) {
-        this.velocity_.x -= this.acceleration_.x * timeInSeconds * (this.keys_.shift ? 4 : 1);
+        this.velocity_.x -= this.acceleration_.x * timeInSeconds * (this.keys_.shift ? 8 : 1);
       }
       if (this.keys_.right) {
-        this.velocity_.x += this.acceleration_.x * timeInSeconds * (this.keys_.shift ? 4 : 1);
+        this.velocity_.x += this.acceleration_.x * timeInSeconds * (this.keys_.shift ? 8 : 1);
       }
 
       const voxelManager = this.FindEntity('voxels').GetComponent('SparseVoxelCellManager');
