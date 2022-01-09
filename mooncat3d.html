@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js webgl - interactive cubes (gpu)</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+		<style>
+			body {
+				background-color: #fff;
+				color: #444;
+			}
+			a {
+				color: #08f;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div id="info">
+			<input type="number" id="mooncat" value="0" onchange="updateMoonCat()"> <input type="button" id="play_btn" value="Play" onclick="play()">
+		</div>
+
+		<div id="container"></div>
+
+		<script type="module">
+
+			import * as THREE from './build/three.module.js';
+
+			import { MoonCatParser } from './jsm/mooncats/mooncatparser.js';
+			import { MoonCats } from './jsm/mooncats/mooncats.min.js';
+			
+			import { ArcballControls } from './jsm/controls/ArcballControls.js';
+			import * as BufferGeometryUtils from './jsm/utils/BufferGeometryUtils.js';
+
+			var SPEED = 0.02;
+			let interval = null;
+			let updating = false;
+			let rad = 0;
+			var axis = new THREE.Vector3(0,1,0);//tilted a bit on x and y - feel free to plug your different axis here
+			let container;
+			let camera, controls, scene, renderer;
+			let group = new THREE.Group();
+			const pointer = new THREE.Vector2();
+			const offset = new THREE.Vector3( 0, 0, 0 );
+			let cubes = [];
+
+
+
+			init();
+			animate();
+
+			function init() {
+				container = document.getElementById( 'container' );
+
+				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera.position.z = 500;
+
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0x000000 );
+
+				scene.add( new THREE.AmbientLight( 0x555555 ) );
+
+				const light = new THREE.SpotLight( 0xffffff, 1.5 );
+				light.position.set( 0, 500, 2000 );
+				scene.add( light );
+
+				const defaultMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true, vertexColors: true, shininess: 0	} );
+
+				renderMoonCat(0);
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				container.appendChild( renderer.domElement );
+
+				controls = new ArcballControls( camera, renderer.domElement, scene );
+				controls.addEventListener( 'start', function () {
+					updating = true;
+					// renderer.render( scene, camera );
+				} );
+				controls.addEventListener( 'end', function () {
+					updating = false;
+					// renderer.render( scene, camera );
+				} );
+				controls.setGizmosVisible(false);
+				controls.rotateSpeed = 1.0;
+				controls.zoomSpeed = 1.2;
+				controls.panSpeed = 0.8;
+				controls.noZoom = false;
+				controls.noPan = false;
+				controls.staticMoving = true;
+				controls.dynamicDampingFactor = 0.3;
+
+				renderer.domElement.addEventListener( 'pointermove', onPointerMove );
+			}
+
+			function onPointerMove( e ) {
+				pointer.x = e.clientX;
+				pointer.y = e.clientY;
+			}
+
+			function animate() {
+				requestAnimationFrame( animate );
+				render();
+			}
+
+			window.play = function(){
+				if(interval == null){
+					interval = setInterval(()=>{
+						let index = parseInt(document.getElementById('mooncat').value)+1;
+						if(index >= 25440){
+							index = 0;
+						}
+						document.getElementById('mooncat').value = index;
+						updateMoonCat();
+					}, 200)
+					document.getElementById('play_btn').value='Stop';
+					
+				} else {
+					clearInterval(interval);
+					interval = null;
+					document.getElementById('play_btn').value='Play';
+				}
+			}
+
+			window.updateMoonCat = function(){
+				let index = parseInt(document.getElementById('mooncat').value);
+				if(index >= 0 && index < 25440){
+					removeObjects();
+					renderMoonCat(index);
+				} else {
+					alert('Invalid MoonCat Token ID');
+				}
+			}
+
+			function render() {
+				controls.update();
+				rotateGroup();
+				renderer.setRenderTarget( null );
+				renderer.render( scene, camera );
+			}
+
+			function generateMoonCat(mooncatId){
+				return MoonCatParser.generateMoonCatPixelMap(mooncatId);;
+			}
+
+			function generateRandomMoonCats(count){
+				let output = [];
+				let genesis = false;
+				let length = 8;
+				let prefix = '00';
+				if(genesis){
+					length = 8;
+					prefix = 'ff';
+				}
+				for(let i=0; i< count; i++){
+					let newMoonCat = randomMoonCatId(length);
+					output.push(MoonCatParser.generateMoonCatCanvas(prefix + newMoonCat, 1));
+				}
+			}
+
+			function randomMoonCatId(size) {
+				return [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+			}
+
+			function removeObjects() {
+
+				for(let i=0; i<cubes.length; i++){
+					let tmp = cubes[i];
+					group.remove(tmp);
+					tmp.geometry.dispose();
+					tmp.material.dispose();
+					tmp = undefined;
+				}
+				cubes = [];
+			}
+
+
+			function rotateGroup() {
+				if(!updating && interval){
+					group.rotateOnAxis(axis,SPEED);
+				}
+			}
+
+
+
+			function renderMoonCat(mooncatId){
+				let blockSize = 10;
+				// group = new THREE.Group();
+				const position = new THREE.Vector3();
+				position.x = 0;
+				position.y = 0;
+				position.z = 0;
+
+				const rotation = new THREE.Euler();
+				rotation.x = 0;
+				rotation.y = 0;
+				rotation.z = 0;
+
+				const scale = new THREE.Vector3();
+				scale.x = 1;
+				scale.y = 1;
+				scale.z = 1;
+				// group.position.set( position );
+				const matrix = new THREE.Matrix4();
+				const quaternion = new THREE.Quaternion();
+				const color = new THREE.Color();
+
+				let pixelMap = generateMoonCat(MoonCats[mooncatId]);
+
+				const offset = new THREE.Vector3( -blockSize*pixelMap.length/2, 0, -blockSize*pixelMap[0].length/2 );
+
+				pixelMap.forEach((row, i)=>{
+					row.forEach((pixel, j)=>{
+						if(pixel != null){
+							const material = new THREE.MeshBasicMaterial( {color: pixel} );
+							let geometry = new THREE.BoxGeometry(1, 1, 1);
+
+							const cube = new THREE.Mesh( geometry, material );
+
+							let x = i*blockSize + offset.x;
+							let y = -j*blockSize - offset.z;
+							let z = 0 + offset.y;
+
+							cube.position.set( x,y,z );
+							cube.rotation.set( 0,0,0 );
+							cube.scale.set( blockSize,blockSize,blockSize );
+							cubes.push(cube);
+							group.add(cube);
+							// scene.add( cube );
+						}
+					})
+				})
+
+				scene.add( group );
+			}
+		</script>
+
+	</body>
+</html>

@@ -153,7 +153,7 @@ export const voxel_block_builder = (() => {
         let keys = Object.keys(ranges);
         
         keys.every((key)=>{
-          height = 15;
+          height = 5;
           if(x >= ranges[key].xMin && x < ranges[key].xMax
             && z >= ranges[key].zMin && z < ranges[key].zMax){
             foundParcel = false;

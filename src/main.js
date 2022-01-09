@@ -178,16 +178,16 @@ if(!window.chrome){
   alert('Currently this only works on Chrome for Desktop');
 }
 
-window.skip = function(){
-  const statusEl = document.getElementById('status');
-    statusEl.innerHTML = 'Loading...';
-    console.log('Skip Wallet Connect');
-  _APP = new LessCrappyMinecraftAttempt();
-}
+// window.skip = function(){
+  
+// }
 
 window.addEventListener('DOMContentLoaded', () => {
-
-  loadWallet(()=>{
-    _APP = new LessCrappyMinecraftAttempt();
-  });
+  const statusEl = document.getElementById('status');
+  statusEl.innerHTML = 'Loading...';
+  console.log('Skip Wallet Connect');
+_APP = new LessCrappyMinecraftAttempt();
+//   loadWallet(()=>{
+//     _APP = new LessCrappyMinecraftAttempt();
+//   });
 });

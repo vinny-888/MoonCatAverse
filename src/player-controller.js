@@ -22,14 +22,15 @@ export const player_controller = (() => {
         backward: false,
         left: false,
         right: false,
+        shift: false,
       };
       this.standing = true;
       this.velocity_ = new THREE.Vector3(0, 0, 0);
       // this.decceleration_ = new THREE.Vector3(-10, -9.8 * 5, -10);
       // this.acceleration_ = new THREE.Vector3(15, 20, 75);
 
-      this.decceleration_ = new THREE.Vector3(-1.62 * 4, -1.62 * 4, -1.62 * 4);
-      this.acceleration_ = new THREE.Vector3(400, 20, 400); // Let the player almost fly!!!
+      this.decceleration_ = new THREE.Vector3(-1.62 * 2, -1.62 * 4, -1.62 * 2);
+      this.acceleration_ = new THREE.Vector3(10, 10, 10); // Let the player almost fly!!!
 
       const threejs = this.FindEntity('renderer').GetComponent('ThreeJSController');
       this.element_ = threejs.threejs_.domElement;
@@ -51,11 +52,15 @@ export const player_controller = (() => {
 
       document.addEventListener('keydown', (e) => this.OnKeyDown_(e), false);
       document.addEventListener('keyup', (e) => this.OnKeyUp_(e), false);
-      // document.addEventListener('mouseup', (e) => this._onMouseUp(e), false);
+      // document.addEventListener('mousedown', (e) => this._onMouseDown(e), false);
+      document.addEventListener('mouseup', (e) => this._onMouseUp(e), false);
     }
 
     OnKeyDown_(event) {
       switch (event.keyCode) {
+        case 16: // shift
+          this.keys_.shift = true;
+          break;
         case 38: // up
         case 87: // w
           this.keys_.forward = true;
@@ -83,6 +88,9 @@ export const player_controller = (() => {
 
     OnKeyUp_(event) {
       switch(event.keyCode) {
+        case 16: // shift
+          this.keys_.shift = false;
+          break;
         case 38: // up
         case 87: // w
           this.keys_.forward = false;
@@ -253,16 +261,16 @@ export const player_controller = (() => {
 
 
       if (this.keys_.forward) {
-        this.velocity_.z -= this.acceleration_.z * timeInSeconds;
+        this.velocity_.z -= this.acceleration_.z * timeInSeconds * (this.keys_.shift ? 4 : 1);
       }
       if (this.keys_.backward) {
-        this.velocity_.z += this.acceleration_.z * timeInSeconds;
+        this.velocity_.z += this.acceleration_.z * timeInSeconds * (this.keys_.shift ? 4 : 1);
       }
       if (this.keys_.left) {
-        this.velocity_.x -= this.acceleration_.x * timeInSeconds;
+        this.velocity_.x -= this.acceleration_.x * timeInSeconds * (this.keys_.shift ? 4 : 1);
       }
       if (this.keys_.right) {
-        this.velocity_.x += this.acceleration_.x * timeInSeconds;
+        this.velocity_.x += this.acceleration_.x * timeInSeconds * (this.keys_.shift ? 4 : 1);
       }
 
       const voxelManager = this.FindEntity('voxels').GetComponent('SparseVoxelCellManager');

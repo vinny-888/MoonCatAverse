@@ -133,6 +133,8 @@ export const sparse_voxel_cell_manager = (() => {
   
       // console.log('BlockRanges: ', JSON.stringify(blockRangesLookup));
       console.log(xMaxWorld, zMaxWorld);
+      const statusEl = document.getElementById('status');
+      statusEl.innerHTML = '';
       return {
         xMaxWorld: xMaxWorld,
         zMaxWorld: zMaxWorld,

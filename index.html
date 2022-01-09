@@ -10,8 +10,17 @@
 <body>
   <div>Chrome Desktop Support Only Currently. First load can take 30-60seconds to cache all the data.</div>
   <div class="status_div">
-    <span id="status">Connect Wallet to see your MoonCat's parcels... Skip to browse the world.</span>
-    <br><input type="button" id="skip" value="Skip" onclick="skip()">
+    <span id="status">Loading...</span>
+    <!--<br><input type="button" id="skip" value="Skip" onclick="skip()"> -->
+  </div>
+  <div class="info_div">
+    <pre id="info">
+Move: W,A,S,D or Arrows
+Jump: Space
+Run: Hold Shift
+Place Block: Click
+Change Block: [ & ]
+    </pre>
   </div>
   <div class="ui" id="game-ui">
     <div class="container" id="container">
@@ -21,7 +30,7 @@
       </div>
     </div>
   </div>
-  <script src="./src/main.js?v=0.3" type="module">
+  <script src="./src/main.js?v=0.4" type="module">
   </script>
   <script type="text/javascript">
     // loadWallet();
